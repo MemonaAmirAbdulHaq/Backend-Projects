@@ -74,6 +74,8 @@ process.env.ACCESS_TOKEN_SECRET,{
 )
 }
 
+
+
 //referesh token generate
 userSchema.methods.generateRefreshToken=function (){
 return jwt.sign({
