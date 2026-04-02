@@ -7,6 +7,20 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY, 
   api_secret: process.env.CLOUDINARY_API_SECRET_KEY
 });
-cloudinary.v2.uploader
-  .upload("my_image.jpg")
-  .then(result=>console.log(result));
+
+const uploadOnCloudinary=async (localFilePath)=>{
+
+  try {
+    if(!localFilePath) return null;
+  } catch (error) {
+   //upload on cloudinary
+     const response=await cloudinary.uploader.upload(localFilePath,{
+      resource_type:'auto',
+    })
+    //file has been uploaded
+    console.log("File is uploaded on cloudinary",
+    response.url);
+    return response;
+  }
+}
+
