@@ -17,7 +17,7 @@ email:{
     lowercase:true,
     trim:true,    
 },
-username:{
+fullName:{
     type:String,
     required:true,
     trim:true,
