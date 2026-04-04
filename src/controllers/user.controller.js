@@ -1,6 +1,8 @@
 import {asyncHandler} from '../utils/asyncHandler.js';
 import {ApiError} from '../utils/ApiError.js';
 import {User} from '../models/user.model.js';
+import {uploadImageToCloudinary, uploadOnCloudinary} from '../utils/cloudinary.js';
+
 const registerUser=asyncHandler(
     async(req,res)=>{
      //get user detail from frontend
@@ -30,8 +32,13 @@ const registerUser=asyncHandler(
      if(existedUser){
       throw new ApiError(409,"User already exist with this username or email")
      }
-     const avatarlocalPath=req.files?.avatar[0]?.path
-
+     const avatarLocalPath=req.files?.avatar[0]?.path;
+     const coverImageLocalPath=req.files?.coverImage[0]?.path;
+     if(!avatarLocalPath){
+       throw new ApiError(400,"Avatar image is required")
+     }
+     const avatar =await uploadOnCloudinary(avatarLocalPath);
+     const coverImage= await uploadOnCloudinary(coverImageLocalPath)
     }
 )
 
