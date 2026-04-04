@@ -30,7 +30,7 @@ const registerUser=asyncHandler(
      if(existedUser){
       throw new ApiError(409,"User already exist with this username or email")
      }
-     
+     req.files?.avatar[0]?.path
 
     }
 )
