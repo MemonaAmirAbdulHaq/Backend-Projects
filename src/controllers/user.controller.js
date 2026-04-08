@@ -1,9 +1,23 @@
 import {asyncHandler} from '../utils/asyncHandler.js';
-import {ApiError} from '../utils/ApiError.js';
+
 import {User} from '../models/user.model.js';
 import {uploadOnCloudinary} from '../utils/cloudinary.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
+import { ApiError } from '../utils/apiError.js';
+const generateAccessAndRefereshToken=async(userId)=>{
+  try {
+    const user=await User.findById(userId);
+    const accessToken=user.generateAccessToken();
+    const refreshToken=user.generateRefreshToken();
 
+
+    user.refreshToken=refreshToken;
+   await user.save({validateBeforeSave:false});
+   return {accessToken,refreshToken}
+  } catch (error) {
+    throw new ApiError(500,"failed to generate access token")
+  }
+}
 const registerUser=asyncHandler(
     async(req,res)=>{
      //get user detail from frontend
@@ -27,12 +41,13 @@ const registerUser=asyncHandler(
     {
   throw new ApiError(400,"All fields are required")
   }
-   const existedUser=  User.findOne({
+   const existedUser=await  User.findOne({
       $or:[{username} ,{email}]
      })
      if(existedUser){
       throw new ApiError(409,"User already exist with this username or email")
      }
+    // console.log(req.files)
      const avatarLocalPath=req.files?.avatar[0]?.path;
      const coverImageLocalPath=req.files?.coverImage[0]?.path;
      
@@ -63,4 +78,36 @@ const registerUser=asyncHandler(
     )}
 )
 
-export {registerUser}
+const loginUser=asyncHandler(async (req,res)=>{
+ //req body ->data
+ //username or email
+ //find the user in db
+  //if  user exist password chk
+  //generate access token and refresh token
+  //send tokens in cookie and response
+
+  const {email,username,password}=req.body;
+
+  if(!username || !email){
+    throw new ApiError(400,"Username or email is required")
+  }
+  const user =await User.findOne({
+    $or:[{username},{email}]
+  })
+  if(!user){
+    throw new ApiError(400,"User does not exist")
+  }
+
+ const isPasswordValid= await user.isPasswordCorrect(password);
+ if(!isPasswordValid){
+  throw new ApiError(401,"Invalid Password")
+ }
+
+const {accessToken,refreshToken}=await generateAccessAndRefereshToken(user._id);
+
+
+})
+
+export {registerUser,
+  loginUser
+}
